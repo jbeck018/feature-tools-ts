@@ -1,0 +1,39 @@
+{
+  "plugins": [
+    {
+      "name": "type-stats",
+      "description": "Collects statistics about generated types",
+      "version": "0.1.0",
+      "module": "./plugins/type-stats-plugin",
+      "options": {
+        "outputPath": "./type-stats.json"
+      },
+      "priority": 100,
+      "enabled": true
+    },
+    {
+      "name": "jsdoc-enhancer",
+      "description": "Enhances JSDoc documentation in generated types",
+      "version": "0.1.0",
+      "module": "./plugins/jsdoc-enhancer-plugin",
+      "options": {
+        "transformations": {
+          "EntitySet": "addEntitySetDocs",
+          "Entity": "addEntityDocs",
+          "FeatureBase": "addFeatureDocs",
+          "DFS": "addDFSDocs"
+        }
+      },
+      "priority": 200,
+      "enabled": true
+    },
+    {
+      "name": "example-disabled-plugin",
+      "description": "This plugin is disabled for demonstration",
+      "version": "0.1.0",
+      "module": "./plugins/non-existent-plugin",
+      "enabled": false,
+      "priority": 300
+    }
+  ]
+} 

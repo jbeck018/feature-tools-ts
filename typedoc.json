@@ -1,0 +1,58 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/docs.ts", "./docs/interactive-examples.ts"],
+  "out": "docs/api",
+  "readme": "./README.md",
+  "name": "Featuretools TypeScript API Reference",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "plugin": ["typedoc-plugin-markdown"],
+  "theme": "./docs/typedoc-themes/interactive",
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Main",
+    "API",
+    "Types",
+    "Utilities",
+    "*"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true
+  },
+  "sort": [
+    "alphabetical",
+    "kind",
+    "visibility"
+  ],
+  "validation": {
+    "invalidLink": true,
+    "notDocumented": true
+  },
+  "visibilityFilters": {
+    "protected": true,
+    "private": false,
+    "inherited": true,
+    "external": true
+  },
+  "searchInComments": true,
+  "sidebarLinks": {
+    "Interactive Examples": "https://github.com/yourusername/featuretools-ts/blob/main/examples/",
+    "Tutorials": "https://github.com/yourusername/featuretools-ts/blob/main/tutorials/"
+  },
+  "customCss": "./docs/custom.css",
+  "navigationLinks": {
+    "GitHub": "https://github.com/user/featuretools-ts",
+    "Interactive Examples": "https://github.com/user/featuretools-ts/tree/main/docs/interactive-examples.ts",
+    "Tutorials": "https://github.com/user/featuretools-ts/tree/main/tutorials"
+  },
+  "sourceLinkTemplate": "https://github.com/user/featuretools-ts/blob/{gitRevision}/{path}#L{line}",
+  "excludeProtected": false,
+  "disableSources": false,
+  "defaultCategory": "API",
+  "hideGenerator": true,
+  "cleanOutputDir": true,
+  "pretty": true
+} 

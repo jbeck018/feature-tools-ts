@@ -1,0 +1,57 @@
+{
+  "name": "featuretools-ts",
+  "version": "0.1.0",
+  "description": "TypeScript bridge for Featuretools Python package",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run generate-types && npm run generate-validators && tsc",
+    "generate-types": "node scripts/generate-types.js",
+    "generate-validators": "node scripts/generate-validators.js",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "ci": "npm run lint && npm run build && npm run test:ci",
+    "docs": "typedoc --options typedoc.json",
+    "docs:build": "npm run docs",
+    "docs:serve": "npm run docs && serve -s docs/api",
+    "docs:watch": "typedoc --options typedoc.json --watch",
+    "prepublishOnly": "npm run build",
+    "debug": "node scripts/debug-tools.js",
+    "debug:interactive": "node scripts/debug-tools.js interactive",
+    "debug:inspector": "node scripts/debug-inspector.js"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.8",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.21.0",
+    "jest": "^29.7.0",
+    "open": "^10.2.0",
+    "serve": "^14.2.4",
+    "ts-jest": "^29.2.6",
+    "typedoc": "^0.27.9",
+    "typedoc-plugin-markdown": "^4.4.2",
+    "typescript": "^5.8.2"
+  },
+  "keywords": [
+    "featuretools",
+    "feature-engineering",
+    "machine-learning",
+    "data-science",
+    "typescript",
+    "python"
+  ],
+  "files": [
+    "dist",
+    "src/python"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

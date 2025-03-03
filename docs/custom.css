@@ -1,0 +1,225 @@
+/**
+ * Custom styles for FeatureTools TypeScript documentation
+ */
+
+/* Better code highlighting */
+.tsd-typography code,
+.tsd-panel code {
+  padding: 2px 5px;
+  border-radius: 3px;
+  background-color: var(--color-background-secondary);
+}
+
+/* Improved section spacing */
+.tsd-panel,
+.tsd-member {
+  margin-bottom: 2rem;
+}
+
+/* Interactive component styling */
+.interactive-component {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 5px;
+  background-color: var(--color-background-secondary);
+}
+
+.interactive-component-header {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--color-accent);
+}
+
+/* Diagram container */
+.interactive-diagram {
+  position: relative;
+  margin: 2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 5px;
+  background-color: var(--color-background-secondary);
+}
+
+/* Type hierarchy visualization */
+.type-hierarchy {
+  display: flex;
+  flex-direction: column;
+  margin: 1.5rem 0;
+}
+
+.type-hierarchy-level {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.type-hierarchy-node {
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 3px;
+  background-color: var(--color-background);
+  cursor: pointer;
+}
+
+.type-hierarchy-node:hover {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.type-hierarchy-connector {
+  height: 1rem;
+  border-left: 2px solid var(--color-accent);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Code example tabs */
+.code-example-tabs {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-accent);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.code-example-tabs-header {
+  display: flex;
+  background-color: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.code-example-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.code-example-tab.active {
+  border-bottom: 2px solid var(--color-accent);
+  font-weight: bold;
+}
+
+.code-example-content {
+  padding: 1rem;
+}
+
+.code-example-panel {
+  display: none;
+}
+
+.code-example-panel.active {
+  display: block;
+}
+
+/* API Method visualization */
+.api-method {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 5px;
+  background-color: var(--color-background-secondary);
+}
+
+.api-method-signature {
+  font-family: monospace;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--color-background);
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.api-method-params {
+  margin-bottom: 1rem;
+}
+
+.api-method-param {
+  display: flex;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.api-method-param-name {
+  flex: 0 0 20%;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.api-method-param-type {
+  flex: 0 0 30%;
+  font-family: monospace;
+  color: var(--color-accent);
+}
+
+.api-method-param-desc {
+  flex: 1;
+}
+
+.api-method-returns {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Interactive playground */
+.interactive-playground {
+  margin: 2rem 0;
+  border: 1px solid var(--color-accent);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.interactive-playground-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.interactive-playground-title {
+  font-weight: bold;
+}
+
+.interactive-playground-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.interactive-playground-editor {
+  min-height: 200px;
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.interactive-playground-output {
+  padding: 1rem;
+  max-height: 200px;
+  overflow: auto;
+  background-color: var(--color-background-secondary);
+}
+
+/* Search enhancements */
+.tsd-search {
+  margin-bottom: 1.5rem;
+}
+
+.tsd-search input {
+  padding: 0.5rem;
+  width: 100%;
+  border: 1px solid var(--color-accent);
+  border-radius: 3px;
+}
+
+/* Print styles */
+@media print {
+  .interactive-component,
+  .interactive-playground,
+  .interactive-diagram {
+    break-inside: avoid;
+  }
+} 

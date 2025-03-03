@@ -1,0 +1,51 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install featuretools typing_inspect
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install TypeDoc Markdown plugin
+        run: npm install --no-save typedoc-plugin-markdown
+
+      - name: Generate types
+        run: npm run generate-types
+
+      - name: Generate validators
+        run: npm run generate-validators
+        
+      - name: Build API documentation
+        run: npm run docs
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs
+          branch: gh-pages
+          clean: true 

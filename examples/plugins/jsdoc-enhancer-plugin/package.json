@@ -1,0 +1,21 @@
+{
+  "name": "featuretools-ts-jsdoc-enhancer-plugin",
+  "version": "0.1.0",
+  "description": "A plugin for Featuretools TypeScript that enhances JSDoc annotations in generated types",
+  "main": "index.js",
+  "keywords": [
+    "featuretools-ts-plugin",
+    "jsdoc",
+    "documentation",
+    "typescript"
+  ],
+  "author": "Featuretools TypeScript Team",
+  "license": "MIT",
+  "dependencies": {},
+  "peerDependencies": {
+    "featuretools-ts": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
