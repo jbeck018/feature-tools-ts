@@ -19,6 +19,18 @@ from version_compat import (
     is_union_type, is_optional_type, VERSION_INFO
 )
 
+# Import scikit-learn support if enabled
+if os.environ.get('INCLUDE_SCIKIT_LEARN') == 'true':
+    try:
+        import scikit_learn_support
+        SCIKIT_LEARN_AVAILABLE = True
+        print("[INFO] Scikit-learn support enabled", file=sys.stderr)
+    except ImportError:
+        SCIKIT_LEARN_AVAILABLE = False
+        print("[WARNING] Scikit-learn support module not found", file=sys.stderr)
+else:
+    SCIKIT_LEARN_AVAILABLE = False
+
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import importlib
 import typing
@@ -820,117 +832,75 @@ def extract_function_info(obj):
     return result
 
 def generate_ts_types():
-    """Generate TypeScript type definitions from either runtime or AST analysis"""
+    """Generate TypeScript interfaces from Python types"""
+    # Import featuretools module
     ft_module = import_featuretools()
     
-    # Check if TypeScript 4.9+ features should be used
-    use_ts49 = os.environ.get('USE_TS_49_FEATURES', 'true').lower() not in ('false', '0')
-    log_perf(f"TypeScript 4.9+ features {'enabled' if use_ts49 else 'disabled'}")
+    # Dictionary to store all interfaces
+    interfaces = {}
     
-    # Generate definitions based on what's available
-    if ft_module:
-        # Extract types using runtime inspection
-        definitions = {
-            'interfaces': {},
-            'types': {},
-            'enums': {},
-            'classes': {},
-            'functions': {}
-        }
+    # Process EntitySet class
+    entityset_class = ft_module.EntitySet
+    interfaces['EntitySet'] = process_object('EntitySet', entityset_class)
+    
+    # Process Entity class
+    entity_class = ft_module.Entity
+    interfaces['Entity'] = process_object('Entity', entity_class)
+    
+    # Process Relationship class
+    relationship_class = ft_module.Relationship
+    interfaces['Relationship'] = process_object('Relationship', relationship_class)
+    
+    # Process DFS function
+    dfs_func = ft_module.dfs
+    interfaces['DFS'] = process_object('DFS', dfs_func, is_class=False)
+    
+    # Process calculate_feature_matrix function
+    calc_fm_func = ft_module.calculate_feature_matrix
+    interfaces['CalculateFeatureMatrix'] = process_object('CalculateFeatureMatrix', calc_fm_func, is_class=False)
+    
+    # Add scikit-learn types if available
+    if SCIKIT_LEARN_AVAILABLE:
+        log_perf("Extracting scikit-learn types")
+        sklearn_types = scikit_learn_support.main()
         
-        # Add EntitySet interface
-        definitions['interfaces']['EntitySet'] = """export interface EntitySet {
-  id: string;
-  entities: Record<string, Entity>;
-  relationships: Relationship[];
-  
-  add_entity(entity: Entity): EntitySet;
-  normalize_entity(base_entity_id: string, new_entity_id: string, index: string): EntitySet;
-}"""
-        
-        # Add Entity interface
-        definitions['interfaces']['Entity'] = """export interface Entity {
-  id: string;
-  df: any;
-  index: string;
-  time_index?: string;
-  variable_types?: Record<string, string>;
-}"""
-        
-        # Add Relationship interface
-        definitions['interfaces']['Relationship'] = """export interface Relationship {
-  parent_entity: string;
-  parent_variable: string;
-  child_entity: string;
-  child_variable: string;
-}"""
-        
-        # Add FeatureDefinition type
-        definitions['types']['FeatureDefinition'] = """export type FeatureDefinition = {
-  name: string;
-  entity: string;
-  type: string;
-  base_features?: FeatureDefinition[];
-};"""
-        
-        # Add example enum for features
-        definitions['enums']['FeatureType'] = """export enum FeatureType {
-  Numeric = "numeric",
-  Categorical = "categorical",
-  Datetime = "datetime",
-  Boolean = "boolean",
-  Text = "text",
-  Unknown = "unknown"
-}"""
-        
-        # Add functions
-        definitions['functions']['dfs'] = """export function dfs(options: DFSOptions): DFSResult;"""
-        
-        return definitions
-    else:
-        # Fallback to a simple string of definitions
-        return """declare module 'featuretools' {
-  export interface EntitySet {
-    id: string;
-    entities: Record<string, Entity>;
-    relationships: Relationship[];
-  }
-  
-  export interface Entity {
-    id: string;
-    df: any;
-    index: string;
-    time_index?: string;
-    variable_types?: Record<string, string>;
-  }
-  
-  export interface Relationship {
-    parent_entity: string;
-    parent_variable: string;
-    child_entity: string;
-    child_variable: string;
-  }
-  
-  export interface DFSOptions {
-    entityset: EntitySet;
-    target_entity: string;
-    [key: string]: any;
-  }
-  
-  export interface DFSResult {
-    feature_matrix: any;
-    feature_defs: FeatureDefinition[];
-  }
-  
-  export type FeatureDefinition = {
-    name: string;
-    entity: string;
-    type: string;
-    base_features?: FeatureDefinition[];
-  };
-  
-  export function dfs(options: DFSOptions): DFSResult;
-}"""
+        for name, obj in sklearn_types.items():
+            # Skip non-class objects for now
+            if not isinstance(obj, type) and not callable(obj):
+                continue
+                
+            # Extract the simple name from the full name
+            simple_name = name.split('.')[-1]
+            
+            # Process the object
+            is_class = isinstance(obj, type)
+            interfaces[simple_name] = process_object(simple_name, obj, is_class=is_class)
+            
+        log_perf(f"Extracted {len(sklearn_types)} scikit-learn types")
+    
+    # Render all interfaces to TypeScript
+    ts_output = []
+    
+    # Add header
+    ts_output.append('/**')
+    ts_output.append(' * TypeScript type definitions for Featuretools')
+    ts_output.append(' * Generated automatically - do not modify directly')
+    ts_output.append(f' * Generated on: {datetime.datetime.now().isoformat()}')
+    ts_output.append(' */')
+    ts_output.append('')
+    
+    # Add imports
+    ts_output.append('// Type imports')
+    ts_output.append('import type { DataFrame } from "pandas";')
+    ts_output.append('import type { Series } from "pandas";')
+    ts_output.append('import type { ndarray } from "numpy";')
+    ts_output.append('')
+    
+    # Add interfaces
+    for name, interface_data in interfaces.items():
+        ts_output.append(render_ts_interface(interface_data))
+    
+    return '\n'.join(ts_output)
 
 # Function to import featuretools - returns the module or a mock
 def import_featuretools():
@@ -978,166 +948,26 @@ def ts_type_for_python_type(py_type, nullable=False):
 
 # Fix the main function to properly format the output with declare module
 def main():
-    """Main function with error handling and performance tracking"""
+    """Main function for generating TypeScript types"""
     try:
-        # Track performance
-        start_time = time.time()
-        log_perf("Starting type generation")
+        # Generate TypeScript types
+        ts_output = generate_ts_types()
         
-        # Check if TypeScript 4.9+ features should be used
-        use_ts49_features = os.environ.get('USE_TS_49_FEATURES', 'true').lower() not in ('false', '0')
-        log_perf(f"TypeScript 4.9+ features {'enabled' if use_ts49_features else 'disabled'}")
-        
-        # Generate TypeScript definitions
-        ts_definitions = generate_ts_types()
-        
-        # Add TypeScript 4.9+ feature imports if enabled
-        ts_feature_imports = ""
-        if use_ts49_features:
-            ts_feature_imports = """
-// Import TypeScript 4.9+ feature utilities
-import { 
-  Satisfies, 
-  PreferType, 
-  hasProperty, 
-  ExtractMethod, 
-  RequireAtLeastOne,
-  asConst,
-  Branded,
-  FeaturePath
-} from './ts-features';
-"""
-        
-        # Enhance type definitions with TypeScript 4.9+ features if enabled
-        if use_ts49_features and isinstance(ts_definitions, dict):
-            # Enhance enum declarations to use const enums
-            if 'enums' in ts_definitions:
-                for enum_name, enum_def in ts_definitions['enums'].items():
-                    if enum_def.startswith('export enum '):
-                        ts_definitions['enums'][enum_name] = enum_def.replace(
-                            'export enum ', 
-                            'export const enum '
-                        )
-            
-            # Enhance FeatureDefinition type to use satisfies operator
-            if 'types' in ts_definitions and 'FeatureDefinition' in ts_definitions['types']:
-                feature_def_type = ts_definitions['types']['FeatureDefinition']
-                if feature_def_type.endswith('};'):
-                    # Add satisfies Record<string, unknown> before the closing }
-                    ts_definitions['types']['FeatureDefinition'] = feature_def_type.replace(
-                        '};', 
-                        '} satisfies Record<string, unknown>;'
-                    )
-                    
-            # Replace nullable string unions with PreferType
-            for section in ['types', 'interfaces']:
-                if section in ts_definitions:
-                    for type_name, type_def in ts_definitions[section].items():
-                        if ' | null;' in type_def and 'string | null;' in type_def:
-                            ts_definitions[section][type_name] = type_def.replace(
-                                'string | null;', 
-                                'PreferType<string, null>;'
-                            )
-        
-        # Convert the definitions to the expected format and output
-        version = getattr(ft, "__version__", "unknown") if FEATURETOOLS_AVAILABLE else "unknown"
-        
-        # Build the final TypeScript definitions
-        ts_output = f"""/**
- * TypeScript type definitions for Featuretools
- * 
- * Generated automatically from Python types.
- * DO NOT EDIT BY HAND.
- * 
- * Featuretools Version: {version}
- * Generation Timestamp: {datetime.datetime.now().isoformat()}
- */
-
-{ts_feature_imports if use_ts49_features else ''}
-"""
-        
-        # Add the actual type definitions
-        if isinstance(ts_definitions, dict):
-            # Start the module declaration
-            ts_output += "declare module 'featuretools' {\n\n"
-            
-            # Format each section
-            for section, items in ts_definitions.items():
-                for name, definition in items.items():
-                    # Remove any existing export and declare module
-                    definition = definition.replace('export ', '')
-                    if 'declare module' in definition:
-                        definition = definition.replace('declare module', '// module')
-                    
-                    # Add export back
-                    definition = 'export ' + definition
-                    ts_output += f"{definition}\n\n"
-            
-            # Close the module declaration
-            ts_output += "}"
+        # Output to stdout or file
+        output_file = os.environ.get('OUTPUT_FILE')
+        if output_file:
+            with open(output_file, 'w') as f:
+                f.write(ts_output)
+            print(f"TypeScript types written to {output_file}", file=sys.stderr)
         else:
-            # Already a string with module declaration
-            ts_output += ts_definitions
+            print(ts_output)
             
-        # Output the final results
-        print(ts_output)
-        log_perf(f"Type generation completed in {time.time() - start_time:.2f}s")
         return 0
-            
     except Exception as e:
-        # Log the error
-        if '--debug' in sys.argv or os.environ.get('DEBUG'):
-            import traceback
-            traceback.print_exc()
-        else:
-            print(f"Error generating TypeScript definitions: {str(e)}", file=sys.stderr)
-        
-        # Output a minimal definition set as a fallback
-        print("""/**
- * ERROR: Failed to generate complete TypeScript definitions
- * Fallback minimal definitions are provided
- */
-        
-export interface EntitySet {
-  id: string;
-  entities: Record<string, Entity>;
-  relationships: Relationship[];
-}
-
-export interface Entity {
-  id: string;
-  df: any;
-  index: string;
-  time_index?: string;
-  variable_types?: Record<string, string>;
-}
-
-export interface Relationship {
-  parent_entity: string;
-  parent_variable: string;
-  child_entity: string;
-  child_variable: string;
-}
-
-export interface DFSOptions {
-  entityset: EntitySet;
-  target_entity: string;
-  [key: string]: any;
-}
-
-export interface DFSResult {
-  feature_matrix: any;
-  feature_defs: FeatureDefinition[];
-}
-
-export interface FeatureDefinition {
-  name: string;
-  entity: string;
-  type: string;
-  base_features?: FeatureDefinition[];
-}
-""")
+        print(f"Error generating TypeScript types: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         return 1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main()) 

@@ -28,6 +28,19 @@
       "enabled": true
     },
     {
+      "name": "scikit-learn",
+      "description": "Adds support for scikit-learn ML library types",
+      "version": "0.1.0",
+      "module": "./plugins/scikit-learn-plugin",
+      "options": {
+        "includeModels": true,
+        "includeTransformers": true,
+        "includeMetrics": true
+      },
+      "priority": 150,
+      "enabled": true
+    },
+    {
       "name": "example-disabled-plugin",
       "description": "This plugin is disabled for demonstration",
       "version": "0.1.0",
